@@ -10,7 +10,7 @@ object Application extends Controller {
     import views.Application._
     
     def index = {
-        html.index(DataMocker.days)
+        html.index(DataMocker.days(20))
     }
     
 }
