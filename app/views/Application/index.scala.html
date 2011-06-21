@@ -1,7 +1,25 @@
-@(title:String)
+@(days:List[models.Day])
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <title>Play Achievo</title>
+    
+</head>
+<body>
+    
+    Activities
+    <ul>
+        @for(d <- days) {
+            <li>@d.date 
+                <ul>
+                    @for(a <- d.activities) {
+                        <li>@a.project @a.phase @a.time  @a.comment</li>
+                    }
+                </ul>
+            
+            </li>
+        }
+    </ul>
 
-@main(title) {
-    
-    @views.defaults.html.welcome(title)
-    
-}
+<body>
+</html>
