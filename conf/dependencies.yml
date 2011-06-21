@@ -2,3 +2,4 @@
 
 require:
     - play
+    - play -> scala 0.9.1
