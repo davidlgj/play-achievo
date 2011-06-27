@@ -1,0 +1,18 @@
+@(achievo: databinder.achievo.Achievo)
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <title>Play Achievo</title>
+</head>
+<body>
+    Achievo cookie: @achievo.achievoCookie.get.getValue<br/>
+    <br/>
+    TimeRegistrationForm:<br/>
+    <table border="1">
+        <tr><th>Key</th><th>Value</th></tr>
+        @for(param <- achievo.timeRegistrationForm(0).toMap) {
+            <tr><td>@param._1</td><td>@param._2</td></tr>
+        }
+    </table>
+</body>
+</html>
