@@ -3,3 +3,13 @@
 require:
     - play
     - play -> scala 0.9.1
+    - net.databinder -> dispatch-http_2.8.1 0.8.3
+    - org.ccil.cowan.tagsoup -> tagsoup 1.2
+
+repositories:
+
+    - Scala Tools:
+        type:       iBiblio
+        root:       http://scala-tools.org/repo-releases
+        contains:
+            - net.databinder -> *

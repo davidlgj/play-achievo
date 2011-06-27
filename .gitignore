@@ -1,2 +1,6 @@
 tmp/**
 logs/**
+test-result/**
+app/Secret.scala
+test/Secret.scala
+play-achievo.iml

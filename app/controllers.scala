@@ -1,5 +1,7 @@
 package controllers
 
+import _root_.databinder.achievo._
+import _root_.secret.Secret
 import play._
 import play.mvc._
 
@@ -11,6 +13,10 @@ object Application extends Controller {
     
     def index = {
         html.index(DataMocker.days(20))
+    }
+
+    def achievo = {
+        html.achievo(Achievo(Secret.name, Secret.pw))
     }
     
 }
