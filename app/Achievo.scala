@@ -45,6 +45,16 @@ class Achievo(user: String, pw: String) {
         extractForms(nodeSeq)
     }
 
+    def timeSurveyForm = {
+        val result = h(TimeSurvey as_str)
+        val source = new org.xml.sax.InputSource(new StringReader(result))
+
+        val nodeSeq = adapter.loadXML(source, parser)
+        println(nodeSeq)
+
+        extractForms(nodeSeq)
+    }
+
     private def extractForms(ns: NodeSeq) = {
         val formNs = ns \\ "form"
 
@@ -105,6 +115,10 @@ object Logout extends Request(Achievo.host / "achievo" / "index.php" <<? Map("at
 object TimeRegistrationForm extends Request(Achievo.host / "achievo" / "dispatch.php" <<?
                  Map("atknodetype" -> "timereg.hours","atkaction" -> "add", "atklevel" -> "1","atkprevlevel" -> "0",
                      "atkstackid" -> "4e05be4ac26c5"))
+
+object TimeSurvey extends Request(Achievo.host / "achievo"/ "dispatch.php" <<? Map("atknodetype" -> "reports.hoursurvey",
+    "atkaction" -> "report", "atklevel" -> "-1", "atkprevlevel" -> "0"))
+
 
 case class Form(name: String, action: String, method: String, enctype: String, inputs: Seq[(String, String, String)],
           textareas: Seq[(String, String, String)], selects: Seq[(String,String,String,Seq[(String,String,String)])]) {

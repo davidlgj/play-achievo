@@ -4,9 +4,9 @@ import java.util.Date
 import java.util.Calendar
 
 
-case class Activity(project:String,phase:String, time:Float, comment:String)
+case class Activity(project:String, phase:String, time:Float, comment:String)
 
-case class Day(activities:List[Activity],date:Date)
+case class Day(activities:List[Activity], date:Date)
 
 object DataMocker {
 

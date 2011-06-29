@@ -38,4 +38,15 @@ class BasicTests extends UnitFlatSpec with ShouldMatchers {
         postParams.filter(p => p._1 == "achievo")(0)._2 should be (a.achievoCookie.get.getValue)
     }
 
+    it should "find a time survey form" in {
+        val a = Achievo(Secret.name, Secret.pw)
+
+        val forms = a.timeSurveyForm
+        println("Survey form:\n"+forms(0).toMap.mkString("\n"))
+
+        forms.size should be (3)
+
+
+    }
+
 }
