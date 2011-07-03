@@ -50,9 +50,21 @@ class Achievo(user: String, pw: String) {
         val source = new org.xml.sax.InputSource(new StringReader(result))
 
         val nodeSeq = adapter.loadXML(source, parser)
-        println(nodeSeq)
 
-        extractForms(nodeSeq)
+        extractForms(nodeSeq)(0)
+    }
+
+    def timeSurveyData = {
+        val result = h(TimeSurvey as_str)
+        val source = new org.xml.sax.InputSource(new StringReader(result))
+
+        val nodeSeq = adapter.loadXML(source, parser)
+        val table = (nodeSeq \\ "table").filter(n => (n \ "@class" text) == "recordListContainer")
+        val headerTable = (table \\ "table").filter(n => (n \ "@id" text) == "rl_1")
+        val headerList = (headerTable \\ "th").map(n => n.text.trim)
+        val rowsTr = (table \\ "tr").filter(n => (n \ "@id" text).startsWith("rl_1") )
+        val rowsData = rowsTr.map(n => (n \ "td").map(_.text.trim))
+        rowsData.map(headerList.zip(_))
     }
 
     private def extractForms(ns: NodeSeq) = {
@@ -65,19 +77,19 @@ class Achievo(user: String, pw: String) {
     private def extractInputs(formNs: NodeSeq): Seq[(String, String, String)] = {
         val inputNs = formNs \\ "input"
 
-        inputNs.map( n => (n \ "@name" text, n \ "@value" text, n \ "@type" text))
+        inputNs.map(n => (n \ "@name" text, n \ "@value" text, n \ "@type" text))
     }
 
     private def extractTextareas(formNs: NodeSeq): Seq[(String, String, String)] = {
         val inputNs = formNs \\ "textarea"
 
-        inputNs.map( n => (n \ "@name" text, n.text, "textarea"))
+        inputNs.map(n => (n \ "@name" text, n.text, "textarea"))
     }
 
     private def extractSelects(formNs: NodeSeq) = {
         val selectNs = formNs \\ "select"
 
-        selectNs.map( n => (n \ "@name" text, selectedOptionValue(n), "select", extractOptions(n)) )
+        selectNs.map(n => (n \ "@name" text, selectedOptionValue(n), "select", extractOptions(n)))
     }
 
     private def selectedOptionValue(n: Node): String = {
@@ -93,16 +105,6 @@ class Achievo(user: String, pw: String) {
         optionNs.map(n => (n \ "@value" text, n.text, n \ "@selected" text))
     }
 
-//    def day(h: Http) = {
-//        dispatch.php?weekview=0&viewdate=2011-06-22&atkprevlevel=0&atkstackid=4e02264a59486&
-//        dispatch.php?weekview=0&viewdate=2011-06-25&atklevel=1&atkprevlevel=1&atkstackid=4e05b096732bb&
-//        4e05b096732bb
-//        4e05be4ac26c5
-//        dispatch.php?atknodetype=pim.pim&atkaction=pim&atklevel=-1&atkprevlevel=0&
-//        dispatch.php?atknodetype=timereg.hours&atkaction=add&atklevel=1&atkprevlevel=0&atkstackid=4e05be4ac26c5&
-//        0b233d86cbcf8f95a2c474cbdde96b9f
-//    }
-
     def logout = {
         h(Logout as_str)
     }
@@ -113,15 +115,23 @@ object Login extends Request(Achievo.host / "achievo" / "index.php" >\ "iso-8859
 object Logout extends Request(Achievo.host / "achievo" / "index.php" <<? Map("atklogout" -> "-1"))
 
 object TimeRegistrationForm extends Request(Achievo.host / "achievo" / "dispatch.php" <<?
-                 Map("atknodetype" -> "timereg.hours","atkaction" -> "add", "atklevel" -> "1","atkprevlevel" -> "0",
-                     "atkstackid" -> "4e05be4ac26c5"))
+    Map("atknodetype" -> "timereg.hours",
+        "atkaction" -> "add",
+        "atklevel" -> "1",
+        "atkprevlevel" -> "0",
+        "atkstackid" -> "4e05be4ac26c5")
+)
 
-object TimeSurvey extends Request(Achievo.host / "achievo"/ "dispatch.php" <<? Map("atknodetype" -> "reports.hoursurvey",
-    "atkaction" -> "report", "atklevel" -> "-1", "atkprevlevel" -> "0"))
+object TimeSurvey extends Request(Achievo.host / "achievo" / "dispatch.php" <<?
+    Map("atknodetype" -> "reports.hoursurvey",
+        "atkaction" -> "report",
+        "atklevel" -> "-1",
+        "atkprevlevel" -> "0")
+)
 
 
 case class Form(name: String, action: String, method: String, enctype: String, inputs: Seq[(String, String, String)],
-          textareas: Seq[(String, String, String)], selects: Seq[(String,String,String,Seq[(String,String,String)])]) {
+    textareas: Seq[(String, String, String)], selects: Seq[(String, String, String, Seq[(String, String, String)])]) {
 
     def toMap = {
         val map = inputs.filterNot(p => p._3 == "reset").filterNot(p => p._3 == "submit").map(p => (p._1 -> p._2))

@@ -5,6 +5,7 @@ require:
     - play -> scala 0.9.1
     - net.databinder -> dispatch-http_2.8.1 0.8.3
     - org.ccil.cowan.tagsoup -> tagsoup 1.2
+    - joda-time -> joda-time 1.6.2
 
 repositories:
 
