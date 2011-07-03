@@ -22,18 +22,24 @@ object Achievo {
     def apply(user: String, pw: String) = new Achievo(user, pw)
 }
 
-class Achievo(user: String, pw: String) {
+class Achievo(val user: String, pw: String) {
     val parser = Achievo.parserFactory.newSAXParser()
     val adapter = new scala.xml.parsing.NoBindingFactoryAdapter
     val h = Http
-    h(Login << Map("auth_user" -> user, "auth_pw" -> pw) as_str)
+    login
+
+    private def login {
+        val result = h(Login << Map("auth_user" -> user, "auth_pw" -> pw) as_str)
+        val source = new org.xml.sax.InputSource(new StringReader(result))
+
+        val nodeSeq = adapter.loadXML(source, parser)
+        if ((nodeSeq \\ "div").find(n => (n \ "@id").text == "loginform").isDefined) {
+            h.client.asInstanceOf[ThreadSafeHttpClient].getCookieStore.clear()
+        }
+    }
 
     def achievoCookie: Option[Cookie] = {
-        h.client.asInstanceOf[ThreadSafeHttpClient].getCookieStore.getCookies.filter(_.getName == "achievo").toList
-        match {
-            case c :: _ => println(c.getValue); Some(c)
-            case _ => None
-        }
+        h.client.asInstanceOf[ThreadSafeHttpClient].getCookieStore.getCookies.find(_.getName == "achievo")
     }
 
     def timeRegistrationForm = {
@@ -107,6 +113,7 @@ class Achievo(user: String, pw: String) {
 
     def logout = {
         h(Logout as_str)
+        h.client.asInstanceOf[ThreadSafeHttpClient].getCookieStore.clear()
     }
 }
 
