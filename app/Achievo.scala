@@ -136,6 +136,14 @@ object TimeSurvey extends Request(Achievo.host / "achievo" / "dispatch.php" <<?
         "atkprevlevel" -> "0")
 )
 
+object Projects extends Request(Achievo.host / "achievo" / "dispatch.php" <<?
+    Map("atknodetype" -> "project.projectselector",
+        "atkaction" -> "select",
+        "atkstartat" -> "10",
+        "atklevel" -> "1",
+        "atkprevlevel" -> "1")
+)
+
 
 case class Form(name: String, action: String, method: String, enctype: String, inputs: Seq[(String, String, String)],
     textareas: Seq[(String, String, String)], selects: Seq[(String, String, String, Seq[(String, String, String)])]) {

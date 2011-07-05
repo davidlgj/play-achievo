@@ -7,22 +7,39 @@ import org.scalatest._
 import org.scalatest.junit._
 import org.scalatest.matchers._
 
-trait AchievoSetup extends FlatSpec with BeforeAndAfterEach {
+trait AchievoIntegrationTestFixture extends AbstractSuite { this: Suite =>
     var achievo: Achievo = _
 
-    override def beforeEach {
-        achievo = Achievo(Secret.name, Secret.pw)
-        println(achievo.achievoCookie.get.getValue)
-        super.beforeEach
-    }
-
-    override def afterEach {
-        achievo.logout
-        super.afterEach
+    abstract override def withFixture(test: NoArgTest) {
+        try {
+            achievo = Achievo(Secret.name, Secret.pw)
+            println("cookie: "+achievo.achievoCookie.get.getValue)
+            super.withFixture(test)
+        } finally {
+            achievo.logout
+        }
     }
 }
 
-class AchievoBasic extends UnitFlatSpec with ShouldMatchers with AchievoSetup {
+trait AchievoSetup extends BeforeAndAfterEach { this: Suite =>
+    var achievo: Achievo = _
+
+    override def beforeEach() {
+        achievo = Achievo(Secret.name, Secret.pw)
+        println("before: "+achievo.achievoCookie.get.getValue)
+        super.beforeEach()
+    }
+
+    override def afterEach() {
+        try {
+            super.afterEach()
+        } finally {
+            achievo.logout
+        }
+    }
+}
+
+class AchievoBasic extends UnitFlatSpec with ShouldMatchers with AchievoIntegrationTestFixture {
 
     it should "run this dumb test" in {
         (1 + 1) should be(2)
@@ -50,9 +67,8 @@ class AchievoLoginFailed extends UnitFlatSpec with ShouldMatchers {
     }
 }
 
-class AchievoLogout extends UnitFlatSpec with ShouldMatchers {
+class AchievoLogout extends UnitFlatSpec with ShouldMatchers with AchievoIntegrationTestFixture {
     it should "return a new cookie after logout" in {
-        var achievo = Achievo(Secret.name, Secret.pw)
         val cookie1 = achievo.achievoCookie.get.getValue
         println(cookie1)
 
@@ -68,7 +84,7 @@ class AchievoLogout extends UnitFlatSpec with ShouldMatchers {
     }
 }
 
-class AchievoRegistrationFormTests extends UnitFlatSpec with ShouldMatchers with AchievoSetup {
+class AchievoRegistrationFormTests extends UnitFlatSpec with ShouldMatchers with AchievoIntegrationTestFixture {
     it should "find an time registration form" in {
         val forms = achievo.timeRegistrationForm
         forms.size should be(1)
@@ -86,7 +102,7 @@ class AchievoRegistrationFormTests extends UnitFlatSpec with ShouldMatchers with
     }
 }
 
-class AchievoRecordFormTests extends UnitFlatSpec with ShouldMatchers with AchievoSetup {
+class AchievoRecordFormTests extends UnitFlatSpec with ShouldMatchers with AchievoIntegrationTestFixture {
     it should "find a time survey form" in {
         val form = achievo.timeSurveyForm
         println("Survey form:")
@@ -98,12 +114,11 @@ class AchievoRecordFormTests extends UnitFlatSpec with ShouldMatchers with Achie
     }
 }
 
-
-class AchievoRecordTests extends UnitFlatSpec with ShouldMatchers with AchievoSetup {
+class AchievoRecordTests extends UnitFlatSpec with ShouldMatchers with AchievoIntegrationTestFixture {
     it should "extract records from rl_1 table" in {
         val reportData = achievo.timeSurveyData
         println(reportData)
-        reportData.size should be(5)
+        (reportData.size > 1) should be (true             )
         reportData.foreach(_.size should be(16))
     }
 }
